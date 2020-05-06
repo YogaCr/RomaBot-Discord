@@ -41,7 +41,7 @@ client.on('message', (message) => {
         return e.guildId === message.guild.id;
     });
     if(message.content==="lmoa"){
-        message.channel.send("https://tenor.com/bcN98.gif");
+        message.channel.send("https://media1.tenor.com/images/3ca6458de2780680eb1b956dfe234a15/tenor.gif");
     }
     if (message.content.startsWith(prefix)) {
         let pesan = message.content.split(" ");
