@@ -40,7 +40,9 @@ client.on('message', (message) => {
     let guild = serverList.find((e) => {
         return e.guildId === message.guild.id;
     });
-
+    if(message.content==="lmoa"){
+        message.channel.send("https://tenor.com/bcN98.gif");
+    }
     if (message.content.startsWith(prefix)) {
         let pesan = message.content.split(" ");
         if (pesan[0] === prefix + "search") {
