@@ -4,8 +4,8 @@ module.exports = function () {
         let youtubeTitle = "";
         let maxpage = 10;
         for (i = 1; i < pesan.length; i++) {
-            if (pesan[i].substring(0, 2) === "-p") {
-                maxpage = pesan[i + 1];
+            if (pesan[i].substring(0, 3) === "-p=") {
+                maxpage = pesan[i].substring(3);
                 break;
             }
             youtubeTitle += pesan[i] + "%20";
@@ -26,6 +26,9 @@ module.exports = function () {
                 }
                 this.sendYoutubeResult(res.data, message, page, maxpage);
             })
+            .catch((e)=>{
+                message.channel.send("Maaf, ada masalah pada command yang anda kirimkan");
+            });
     },
     this.sendYoutubeResult = function (data, message, page, maxpage) {
         if (page == -1) {

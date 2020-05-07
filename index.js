@@ -205,7 +205,7 @@ function sendHelpCommand(message) {
         .setTitle('Command List')
         .addFields(
             { name: "**r*help**", value: "Menampilkan list command\n**-----------------------------------------------**" },
-            { name: "**r*search {judul} {optional:-p=(number)}**", value: "Menampilkan video Youtube berdasarkan pencarian\n\noptional :\n-p {maxpage} batas video yang dicari (default:10)\n\ncontoh :\nr*search Minecraft Pewdiepie -p 5\n**-----------------------------------------------**" },
+            { name: "**r*search {judul} {optional:-p=(number)}**", value: "Menampilkan video Youtube berdasarkan pencarian\n\noptional :\n-p {maxpage} batas video yang dicari (default:10)\n\ncontoh :\nr*search Minecraft Pewdiepie -p=5\n**-----------------------------------------------**" },
             { name: "**r*ulartangga {optional:-position}**", value: "Bermain permainan ular tangga\n\noptional:\n-position : menampilkan posisi pemain\n**-----------------------------------------------**" },
             { name: "**r*fasthand {optional:-maxscore=(number)}**", value: "Bermain tebakan kata (dalam bahasa inggris), siapa cepat dia pemenangnya\n\noptional:\n-maxscore : mengubah maximum score yang harus dicapai (default:10)\n**-----------------------------------------------**" },
             { name: "**r*hangman**", value: "Bermain hangman, diberikan 5 kali percobaan untuk menebak huruf yang tepat sehingga membentuk kata atau kalimat yang benar\n**-----------------------------------------------**" },
