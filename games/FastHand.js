@@ -1,5 +1,5 @@
-const Utility = require('./Utility.js');
-const Word = require('./words_dictionary.json');
+const Utility = require('../Utility.js');
+const Word = require('../words_dictionary.json');
 require('dotenv').config();
 
 module.exports = function (guild) {
@@ -26,6 +26,7 @@ module.exports = function (guild) {
                         this.guild.gameLobby = false;
                         this.guild.gameStart = true;
                         this.guild.gameType = 1;
+                        this.guild.channelId = m.channel.id;
                         this.progressFastHand(message);
                     }
                     else if (react.first().emoji.name === '🤚') {
@@ -48,17 +49,17 @@ module.exports = function (guild) {
         },
 
         this.progressFastHand = function (message) {
-            while (this.guild.tebakKata.length < 3) {
+            while (this.guild.fasthand.tebakKata.length < 3) {
                 let index = Math.floor(Math.random() * this.totalKata);
-                this.guild.tebakKata = Word[index];
+                this.guild.fasthand.tebakKata = Word[index];
             }
-            let ambil = Math.floor(Math.random() * (this.guild.tebakKata.length - 3));
-            this.guild.tebakKata = this.guild.tebakKata.substring(ambil, ambil + 3);
-            message.channel.send("Tebak kata yang mengandung **" + this.guild.tebakKata + "**");
+            let ambil = Math.floor(Math.random() * (this.guild.fasthand.tebakKata.length - 3));
+            this.guild.fasthand.tebakKata = this.guild.fasthand.tebakKata.substring(ambil, ambil + 3);
+            message.channel.send("Tebak kata yang mengandung **" + this.guild.fasthand.tebakKata + "**");
         },
 
         this.checkFastHand = function (message) {
-            if (message.content.indexOf(this.guild.tebakKata) != -1) {
+            if (message.content.indexOf(this.guild.fasthand.tebakKata) != -1) {
                 if (Word.findIndex((e) => {
                     return e === message.content
                 }) != -1) {
@@ -69,13 +70,13 @@ module.exports = function (guild) {
                         this.guild.player[indexPenjawab].score++;
                         message.channel.send("<@" + this.guild.player[indexPenjawab].id + "> benar\nSkor : " + this.guild.player[indexPenjawab].score);
                         let indexPemenang = this.guild.player.findIndex((e) => {
-                            return e.score == this.guild.maximumScore;
+                            return e.score == this.guild.fasthand.maximumScore;
                         });
                         if (indexPemenang != -1) {
                             message.channel.send("<@" + this.guild.player[indexPenjawab].id + "> Menang");
                             this.utilityObj.hentikanPermainan();
                         } else {
-                            this.guild.tebakKata = "";
+                            this.guild.fasthand.tebakKata = "";
                             this.progressFastHand(message);
                         }
                     }

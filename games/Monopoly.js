@@ -1,4 +1,4 @@
-const Utility = require('./Utility.js');
+const Utility = require('../Utility.js');
 const Discord = require('discord.js');
 
 module.exports = function (guild) {
@@ -555,6 +555,7 @@ module.exports = function (guild) {
                         this.guild.gameType = 2;
                         this.guild.monopoly.faseBangun = false;
                         this.guild.monopoly.faseTukar = false;
+                        this.guild.channelId = m.channel.id;
                         this.guild.monopoly.kaliDaduKembar = 0;
                         message.channel.send("Permainan dimulai");
                         this.progressMonopoly(message);

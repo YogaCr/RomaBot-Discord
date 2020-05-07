@@ -1,12 +1,13 @@
 const Discord = require('discord.js');
-const UlarTangga = require("./UlarTangga.js");
+const UlarTangga = require("./games/UlarTangga.js");
 const Utility = require('./Utility.js');
-const FastHand = require('./FastHand.js');
+const FastHand = require('./games/FastHand.js');
 const SearchYoutube = require('./SearchYoutube.js');
-const Monopoly = require('./Monopoly.js');
+const Monopoly = require('./games/Monopoly.js');
+const HangMan = require('./games/Hangman.js');
 require('dotenv').config();
 
-const prefix = "y*";
+const prefix = "r*";
 const client = new Discord.Client();
 
 var serverList = [
@@ -17,9 +18,18 @@ var serverList = [
         gameLobby: false,
         gameStart: false,
         gameType: -1,
-        tebakKata: "",
+        channelId:"",
         starterId: "",
-        maximumScore:0,
+        fasthand:{
+            tebakKata:"",
+            maximumScore:0,
+        },
+        hangman:{
+            tebakKata:"",
+            percobaan:5,
+            pemberiKata:"",
+            sudahDitebak:""
+        },
         monopoly:{
             kaliDaduKembar:0,
             faseBangun:false,
@@ -31,17 +41,32 @@ var serverList = [
 client.once('ready', () => {
     console.log('Ready!');
     client.user.setStatus('available')
-    client.user.setActivity('Escaping From Depression | https://github.com/YogaCr');
+    client.user.setActivity('r*help for guide | Escaping From Depression | https://github.com/YogaCr');
 });
 
 client.on('message', (message) => {
+    if (message.channel.type == "dm") {
+        let guildIndex = serverList.findIndex((e) => {
+            return e.hangman.pemberiKata === message.recipient.id && e.gameType == 3 && e.gameStart == true;
+        })
+        console.log(message.content);
+        if (guildIndex != -1) {
+            serverList[guildIndex].hangman.tebakKata = message.content;
+        }
+        let hangManObj = new HangMan(serverList[guildIndex]);
+        return hangManObj.progressHangMan(message);
+    }
+
     checkServer(message);
 
     let guild = serverList.find((e) => {
         return e.guildId === message.guild.id;
     });
-    if(message.content==="lmoa"){
+    if (message.content === "lmoa") {
         message.channel.send("https://media1.tenor.com/images/3ca6458de2780680eb1b956dfe234a15/tenor.gif");
+    }
+    if (message.content === "nonono") {
+        message.channel.send("https://media.tenor.com/images/bc112882a77db08c53e072765be4fe1e/tenor.gif");
     }
     if (message.content.startsWith(prefix)) {
         let pesan = message.content.split(" ");
@@ -94,20 +119,30 @@ client.on('message', (message) => {
             });
             if (maxScoreIndex != -1) {
                 try {
-                    guild.maximumScore = pesan[maxScoreIndex].substring(10) / 1;
+                    guild.fasthand.maximumScore = pesan[maxScoreIndex].substring(10) / 1;
                     message.channel.send("Skor maksimum diubah menjadi " + pesan[maxScoreIndex].substring(10));
                 }
                 catch (e) {
                     return message.channel.send("Tolong masukkan skor maksimum yang valid (angka)");
                 }
             } else {
-                guild.maximumScore = 10;
+                guild.fasthand.maximumScore = 10;
             }
             let fastHandObj = new FastHand(guild);
             guild.gameLobby = true;
             guild.starterId = message.author.id;
             guild.player.push({ id: message.author.id, name: message.author.username, score: 0 });
             fastHandObj.gameFastHand(message);
+        }
+        else if (pesan[0] == prefix + "hangman") {
+            if (guild.gameLobby || guild.gameStart) {
+                return message.channel.send("Ada game yang sedang berjalan");
+            }
+            let hangManObj = new HangMan(guild);
+            guild.gameLobby = true;
+            guild.starterId = message.author.id;
+            guild.player.push({ id: message.author.id, name: message.author.username, type: "player" });
+            hangManObj.gameHangMan(message);
         }
         else if (pesan[0] == prefix + "stop" && message.author.id === guild.starterId) {
             let utilityObj = new Utility(guild);
@@ -117,9 +152,15 @@ client.on('message', (message) => {
         }
     }
     else {
-        if (guild.gameStart && guild.gameType == 1) {
-            let fastHandObj = new FastHand(guild);
-            fastHandObj.checkFastHand(message);
+        if (guild.gameStart && message.channel.id === guild.channelId) {
+            if (guild.gameType == 1) {
+                let fastHandObj = new FastHand(guild);
+                fastHandObj.checkFastHand(message);
+            }
+            else if (guild.gameType == 3) {
+                let hangManObj = new HangMan(guild);
+                hangManObj.progressHangMan(message);
+            }
         }
     }
 })
@@ -136,9 +177,18 @@ function checkServer(message) {
                 gameLobby: false,
                 gameStart: false,
                 gameType: -1,
-                tebakKata: "",
                 starterId: "",
-                maximumScore: 0,
+                channelId: "",
+                fasthand: {
+                    tebakKata: "",
+                    maximumScore: 0,
+                },
+                hangman: {
+                    tebakKata: "",
+                    percobaan: 5,
+                    pemberiKata: "",
+                    sudahDitebak: ""
+                },
                 monopoly: {
                     kaliDaduKembar: 0,
                     faseBangun: false,
@@ -151,14 +201,17 @@ function checkServer(message) {
 
 function sendHelpCommand(message) {
     const embedMessage = new Discord.MessageEmbed()
-        .setColor('#0099ff')
-        .setTitle('List Command')
+        .setColor('#ffffff')
+        .setTitle('Command List')
         .addFields(
-            { name: "**y*help**", value: "Menampilkan list command" },
-            { name: "**y*search {judul} {optional:-p}**", value: "Menampilkan video Youtube berdasarkan pencarian\n\noptional :\n-p {maxpage} batas video yang dicari (default:10)\n\ncontoh :\ny*search Minecraft Pewdiepie -p 5" },
-            { name: "**y*ulartangga {optional:-position}**", value: "Bermain permainan ular tangga\n\noptional:\n-position : menampilkan posisi pemain" },
-            { name: "**y*fasthand {optional:-maxscore}**", value: "Bermain permainan ular tangga\n\noptional:\n-maxscore : mengubah maximum score yang harus dicapai (default:10)" }
-        );
+            { name: "**r*help**", value: "Menampilkan list command\n**-----------------------------------------------**" },
+            { name: "**r*search {judul} {optional:-p=(number)}**", value: "Menampilkan video Youtube berdasarkan pencarian\n\noptional :\n-p {maxpage} batas video yang dicari (default:10)\n\ncontoh :\nr*search Minecraft Pewdiepie -p 5\n**-----------------------------------------------**" },
+            { name: "**r*ulartangga {optional:-position}**", value: "Bermain permainan ular tangga\n\noptional:\n-position : menampilkan posisi pemain\n**-----------------------------------------------**" },
+            { name: "**r*fasthand {optional:-maxscore=(number)}**", value: "Bermain tebakan kata (dalam bahasa inggris), siapa cepat dia pemenangnya\n\noptional:\n-maxscore : mengubah maximum score yang harus dicapai (default:10)\n**-----------------------------------------------**" },
+            { name: "**r*hangman**", value: "Bermain hangman, diberikan 5 kali percobaan untuk menebak huruf yang tepat sehingga membentuk kata atau kalimat yang benar\n**-----------------------------------------------**" },
+            { name: "Gif Reaction", value: "Beberapa pesan berikut akan direspon oleh bot berupa gif image:\nlmoa\nnonono" }
+        )
+
     message.channel.send(embedMessage);
 }
 

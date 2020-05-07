@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const Utility = require('./Utility.js');
+const Utility = require('..//Utility.js');
 require('dotenv').config();
 
 module.exports = function (guild) {
@@ -44,6 +44,7 @@ module.exports = function (guild) {
                         this.guild.gameLobby = false;
                         this.guild.gameStart = true;
                         this.guild.gameType = 0;
+                        this.guild.channelId = m.channel.id;
                         message.channel.send("Permainan dimulai");
                         this.progressUlarTangga(message);
                     }
