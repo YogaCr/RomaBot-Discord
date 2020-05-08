@@ -45,121 +45,122 @@ client.once('ready', () => {
 });
 
 client.on('message', (message) => {
-    if (message.channel.type == "dm") {
+    if (message.channel.type == "dm" && message.author.id != process.env.BOT_ID) {
         let guildIndex = serverList.findIndex((e) => {
-            return e.hangman.pemberiKata === message.recipient.id && e.gameType == 3 && e.gameStart == true;
+            return e.hangman.pemberiKata === message.author.id && e.gameType == 3 && e.gameStart == true;
         })
-        console.log(message.content);
+        console.log(guildIndex);
         if (guildIndex != -1) {
-            serverList[guildIndex].hangman.tebakKata = message.content;
+            serverList[guildIndex].hangman.tebakKata = message.content.toLowerCase();
         }
         let hangManObj = new HangMan(serverList[guildIndex]);
-        return hangManObj.progressHangMan(message);
+        hangManObj.mulaiHangman(client);
+        return;
     }
+    else if (message.channel.type === "text") {
+        checkServer(message);
 
-    checkServer(message);
-
-    let guild = serverList.find((e) => {
-        return e.guildId === message.guild.id;
-    });
-    if (message.content === "lmoa") {
-        message.channel.send("https://media1.tenor.com/images/3ca6458de2780680eb1b956dfe234a15/tenor.gif");
-    }
-    if (message.content === "nonono") {
-        message.channel.send("https://media.tenor.com/images/bc112882a77db08c53e072765be4fe1e/tenor.gif");
-    }
-    if (message.content.startsWith(prefix)) {
-        let pesan = message.content.split(" ");
-        if (pesan[0] === prefix + "search") {
-            let searchYoutubeObj = new SearchYoutube();
-            searchYoutubeObj.searchYoutube(pesan, message);
+        let guild = serverList.find((e) => {
+            return e.guildId === message.guild.id;
+        });
+        if (message.content.toLowerCase() === "lmoa") {
+            message.channel.send("https://media1.tenor.com/images/3ca6458de2780680eb1b956dfe234a15/tenor.gif");
         }
-        else if (pesan[0] === prefix + "help") {
-            sendHelpCommand(message);
+        if (message.content.toLowerCase() === "nonono") {
+            message.channel.send("https://media.tenor.com/images/bc112882a77db08c53e072765be4fe1e/tenor.gif");
         }
-        else if (pesan[0] === prefix + "ulartangga") {
-            let ularTanggaObj = new UlarTangga(guild);
-            if (pesan[1] === "-position") {
-                if (!guild.gameStart) {
-                    return message.channel.send("Permainan belum dimulai");
-                }
-                ularTanggaObj.cekPosisiUlarTangga(message);
-            } else {
-                if (guild.gameLobby || guild.gameStart) {
-                    message.channel.send("Masih ada game yang berjalan");
+        if (message.content.toLowerCase().startsWith(prefix)) {
+            let pesan = message.content.toLowerCase().split(" ");
+            if (pesan[0] === prefix + "search") {
+                let searchYoutubeObj = new SearchYoutube();
+                searchYoutubeObj.searchYoutube(pesan, message);
+            }
+            else if (pesan[0] === prefix + "help") {
+                sendHelpCommand(message);
+            }
+            else if (pesan[0] === prefix + "ulartangga") {
+                let ularTanggaObj = new UlarTangga(guild);
+                if (pesan[1] === "-position") {
+                    if (!guild.gameStart) {
+                        return message.channel.send("Permainan belum dimulai");
+                    }
+                    ularTanggaObj.cekPosisiUlarTangga(message);
                 } else {
-                    guild.starterId = message.author.id;
-                    guild.player.push({ type: "player", id: message.author.id, name: message.author.username, position: 1 });
-                    ularTanggaObj.gameUlarTangga(message);
+                    if (guild.gameLobby || guild.gameStart) {
+                        message.channel.send("Masih ada game yang berjalan");
+                    } else {
+                        guild.starterId = message.author.id;
+                        guild.player.push({ type: "player", id: message.author.id, name: message.author.username, position: 1 });
+                        ularTanggaObj.gameUlarTangga(message);
+                    }
                 }
             }
-        }
-        else if (pesan[0] === prefix + "monopoly") {
-            let monopolyObj = new Monopoly(guild);
-            if (pesan[1] === "-position") {
-                if (!guild.gameStart) {
-                    return message.channel.send("Permainan belum dimulai");
-                }
-            } else {
-                if (guild.gameLobby || guild.gameStart) {
-                    message.channel.send("Masih ada game yang berjalan");
+            else if (pesan[0] === prefix + "monopoly") {
+                let monopolyObj = new Monopoly(guild);
+                if (pesan[1] === "-position") {
+                    if (!guild.gameStart) {
+                        return message.channel.send("Permainan belum dimulai");
+                    }
                 } else {
-                    guild.starterId = message.author.id;
-                    guild.player.push({ type: "player", id: message.author.id, name: message.author.username, position: 0, money: 2000, penjara: false, turnPenjara: 0 });
-                    monopolyObj.gameMonopoly(message);
+                    if (guild.gameLobby || guild.gameStart) {
+                        message.channel.send("Masih ada game yang berjalan");
+                    } else {
+                        guild.starterId = message.author.id;
+                        guild.player.push({ type: "player", id: message.author.id, name: message.author.username, position: 0, money: 2000, penjara: false, turnPenjara: 0 });
+                        monopolyObj.gameMonopoly(message);
+                    }
                 }
             }
-        }
-        else if (pesan[0] === prefix + "fasthand") {
-            if (guild.gameLobby || guild.gameStart) {
-                return message.channel.send("Ada game yang sedang berjalan");
-            }
-            let maxScoreIndex = pesan.findIndex((e) => {
-                return e.substring(0, 10) === "-maxscore=";
-            });
-            if (maxScoreIndex != -1) {
-                try {
-                    guild.fasthand.maximumScore = pesan[maxScoreIndex].substring(10) / 1;
-                    message.channel.send("Skor maksimum diubah menjadi " + pesan[maxScoreIndex].substring(10));
+            else if (pesan[0] === prefix + "fasthand") {
+                if (guild.gameLobby || guild.gameStart) {
+                    return message.channel.send("Ada game yang sedang berjalan");
                 }
-                catch (e) {
-                    return message.channel.send("Tolong masukkan skor maksimum yang valid (angka)");
+                let maxScoreIndex = pesan.findIndex((e) => {
+                    return e.substring(0, 10) === "-maxscore=";
+                });
+                if (maxScoreIndex != -1) {
+                    try {
+                        guild.fasthand.maximumScore = pesan[maxScoreIndex].substring(10) / 1;
+                        message.channel.send("Skor maksimum diubah menjadi " + pesan[maxScoreIndex].substring(10));
+                    }
+                    catch (e) {
+                        return message.channel.send("Tolong masukkan skor maksimum yang valid (angka)");
+                    }
+                } else {
+                    guild.fasthand.maximumScore = 10;
                 }
-            } else {
-                guild.fasthand.maximumScore = 10;
-            }
-            let fastHandObj = new FastHand(guild);
-            guild.gameLobby = true;
-            guild.starterId = message.author.id;
-            guild.player.push({ id: message.author.id, name: message.author.username, score: 0 });
-            fastHandObj.gameFastHand(message);
-        }
-        else if (pesan[0] == prefix + "hangman") {
-            if (guild.gameLobby || guild.gameStart) {
-                return message.channel.send("Ada game yang sedang berjalan");
-            }
-            let hangManObj = new HangMan(guild);
-            guild.gameLobby = true;
-            guild.starterId = message.author.id;
-            guild.player.push({ id: message.author.id, name: message.author.username, type: "player" });
-            hangManObj.gameHangMan(message);
-        }
-        else if (pesan[0] == prefix + "stop" && message.author.id === guild.starterId) {
-            let utilityObj = new Utility(guild);
-            utilityObj.hentikanPermainan();
-            message.channel.send("Semua permainan dihentikan");
-            clearTimeout();
-        }
-    }
-    else {
-        if (guild.gameStart && message.channel.id === guild.channelId) {
-            if (guild.gameType == 1) {
                 let fastHandObj = new FastHand(guild);
-                fastHandObj.checkFastHand(message);
+                guild.gameLobby = true;
+                guild.starterId = message.author.id;
+                guild.player.push({ id: message.author.id, name: message.author.username, score: 0 });
+                fastHandObj.gameFastHand(message);
             }
-            else if (guild.gameType == 3) {
+            else if (pesan[0] == prefix + "hangman") {
+                if (guild.gameLobby || guild.gameStart) {
+                    return message.channel.send("Ada game yang sedang berjalan");
+                }
                 let hangManObj = new HangMan(guild);
-                hangManObj.progressHangMan(message);
+                guild.gameLobby = true;
+                guild.starterId = message.author.id;
+                guild.player.push({ id: message.author.id, name: message.author.username, type: "player" });
+                hangManObj.gameHangMan(message, client);
+            }
+            else if (pesan[0] == prefix + "stop" && message.author.id === guild.starterId) {
+                let utilityObj = new Utility(guild);
+                utilityObj.hentikanPermainan();
+                message.channel.send("Semua permainan dihentikan");
+            }
+        }
+        else {
+            if (guild.gameStart && message.channel.id === guild.channelId) {
+                if (guild.gameType == 1) {
+                    let fastHandObj = new FastHand(guild);
+                    fastHandObj.checkFastHand(message);
+                }
+                else if (guild.gameType == 3) {
+                    let hangManObj = new HangMan(guild);
+                    hangManObj.progressHangMan(message);
+                }
             }
         }
     }

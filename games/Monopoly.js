@@ -547,7 +547,7 @@ module.exports = function (guild) {
                     userReact = user;
                     return ['✅', '🤚', '💻'].includes(reaction.emoji.name) && user.id != process.env.BOT_ID;
                 };
-                m.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] }).then((react) => {
+                m.awaitReactions(filter, { max: 1, time: 6000000, errors: ['time'] }).then((react) => {
                     if (react.first().emoji.name === '✅' && userReact.id === this.guild.starterId) {
                         m.delete({ timeout: 100 });
                         this.guild.gameLobby = false;
@@ -610,7 +610,7 @@ module.exports = function (guild) {
                                 let filter = (reaction, user) => {
                                     return ['🎲'].includes(reaction.emoji.name) && user.id === this.guild.player[this.guild.gameTurn].id;
                                 };
-                                m.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] }).then((react) => {
+                                m.awaitReactions(filter, { max: 1, time: 600000, errors: ['time'] }).then((react) => {
                                     if (react.first().emoji.name === '🎲') {
                                         m.reactions.removeAll();
                                         this.rollDadu(m);
@@ -713,7 +713,7 @@ module.exports = function (guild) {
                         let filter = (reaction, user) => {
                             return ["✅", "❌"].includes(reaction.emoji.name) && user.id === this.guild.player[this.guild.gameTurn].id;
                         };
-                        m.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] }).then((react) => {
+                        m.awaitReactions(filter, { max: 1, time: 600000, errors: ['time'] }).then((react) => {
                             if (react.first().emoji.name === '✅') {
                                 m.reactions.removeAll();
                                 prop.owner = this.guild.gameTurn;
@@ -861,7 +861,7 @@ module.exports = function (guild) {
                     let filter = (reaction, user) => {
                         return ["✅ ", "❌"].includes(reaction.emoji.name) && user.id === this.guild.player[this.guild.gameTurn].id;
                     };
-                    m.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] }).then((react) => {
+                    m.awaitReactions(filter, { max: 1, time: 600000, errors: ['time'] }).then((react) => {
                         if (react.first().emoji.name === '✅ ') {
                             m.reactions.removeAll();
                             bebas = true;
@@ -882,7 +882,7 @@ module.exports = function (guild) {
                         let filter = (reaction, user) => {
                             return ["✅ ", "❌"].includes(reaction.emoji.name) && user.id === this.guild.player[this.guild.gameTurn].id;
                         };
-                        m.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] }).then((react) => {
+                        m.awaitReactions(filter, { max: 1, time: 600000, errors: ['time'] }).then((react) => {
                             if (react.first().emoji.name === '✅ ') {
                                 m.reactions.removeAll();
                                 bebas = true;
@@ -907,7 +907,7 @@ module.exports = function (guild) {
                             let filter = (reaction, user) => {
                                 return ['🎲'].includes(reaction.emoji.name) && user.id === this.guild.player[this.guild.gameTurn].id;
                             };
-                            m.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] }).then((react) => {
+                            m.awaitReactions(filter, { max: 1, time: 600000, errors: ['time'] }).then((react) => {
                                 if (react.first().emoji.name === '🎲') {
                                     m.reactions.removeAll();
                                     let dadu1 = Math.floor(Math.random() * 6) + 1;
@@ -947,7 +947,7 @@ module.exports = function (guild) {
                 let filter = (reaction, user) => {
                     return ['🤝', '🏘', '✅'].includes(reaction.emoji.name) && user.id === this.guild.player[this.guild.gameTurn].id;
                 };
-                m.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] }).then((react) => {
+                m.awaitReactions(filter, { max: 1, time: 600000, errors: ['time'] }).then((react) => {
                     if (react.first().emoji.name === '🤝') {
                         m.reactions.removeAll();
                         this.guild.monopoly.faseTukar = true;
@@ -975,7 +975,7 @@ module.exports = function (guild) {
                             let flt = (reaction, user) => {
                                 return ['❌'].includes(reaction.emoji.name) && user.id === this.guild.player[this.guild.gameTurn].id;
                             };
-                            m.awaitReactions(flt, { max: 1, time: 60000, errors: ['time'] }).then((rct) => {
+                            m.awaitReactions(flt, { max: 1, time: 600000, errors: ['time'] }).then((rct) => {
                                 if (rct.first().emoji.name === '❌') {
                                     msg.reactions.removeAll();
                                     this.guild.monopoly.faseTukar = false;
@@ -1005,7 +1005,7 @@ module.exports = function (guild) {
                             let flt = (reaction, user) => {
                                 return ['❌'].includes(reaction.emoji.name) && user.id === this.guild.player[this.guild.gameTurn].id;
                             };
-                            m.awaitReactions(flt, { max: 1, time: 60000, errors: ['time'] }).then((rct) => {
+                            m.awaitReactions(flt, { max: 1, time: 600000, errors: ['time'] }).then((rct) => {
                                 if (rct.first().emoji.name === '❌') {
                                     msg.reactions.removeAll();
                                     this.guild.monopoly.faseBangun = false;

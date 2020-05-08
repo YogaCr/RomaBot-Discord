@@ -25,7 +25,7 @@ module.exports = function (guild) {
                     userReact = user;
                     return ['✅', '🤚'].includes(reaction.emoji.name) && user.id != process.env.BOT_ID;
                 };
-                m.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] }).then((react) => {
+                m.awaitReactions(filter, { max: 1, time: 600000, errors: ['time'] }).then((react) => {
                     if (react.first().emoji.name === '✅' && userReact.id === this.guild.starterId) {
                         m.delete({ timeout: 100 });
                         if (this.guild.player.length == 1) {
@@ -37,9 +37,9 @@ module.exports = function (guild) {
                             message.channel.send("Karena anda hanya sendiri, maka saya tambahkan bot");
                             this.guild.hangman.pemberiKata = "bot";
                         } else {
-                            let random = Math.floor(Math.random() * this.guild.player.length + 1);
+                            let random = Math.floor(Math.random() * this.guild.player.length);
                             this.guild.hangman.pemberiKata = this.guild.player[random].id;
-                            client.users.get(this.guild.player[random].id).send("Anda dipilih sebagai pemberi kata atau kalimat yang akan ditebak\nBalas bot ini dengan tulisan yang anda inginkan");
+                            message.guild.members.cache.get(this.guild.hangman.pemberiKata).user.send("Anda dipilih untuk menetapkan kata/kalimat yang akan ditebak\nSilahkan balas pesan ini dengan kata/kalimat yang akan ditebak.");
                         }
                         this.guild.channelId = m.channel.id;
                         this.guild.gameLobby = false;
@@ -50,9 +50,7 @@ module.exports = function (guild) {
                             return e.type === "bot";
                         }) != -1) {
                             let index = Math.floor(Math.random() * this.totalKata);
-                            console.log(Word[index]);
                             this.guild.hangman.tebakKata = Word[index];
-                            console.log(this.guild.hangman.tebakKata);
                             this.guild.hangman.tebakKata.split('').forEach((e) => {
                                 if (e != " ") {
                                     this.guild.hangman.sudahDitebak += "_";
@@ -72,10 +70,10 @@ module.exports = function (guild) {
                             });
                         }
                         else {
-                            this.guild.player.push({ type: "player", id: userReact.id, name: userReact.username, score: 0 });
+                            this.guild.player.push({ type: "player", id: userReact.id, name: userReact.username });
                         }
                         m.delete({ timeout: 100 });
-                        this.gameHangMan(message);
+                        this.gameHangMan(message, client);
                     }
                 }).catch((e) => {
                     console.log(e);
@@ -83,21 +81,24 @@ module.exports = function (guild) {
             });
         },
         this.progressHangMan = function (message) {
+            if (message.author.id == this.guild.hangman.pemberiKata) {
+                return;
+            }
             if (this.guild.player.findIndex((e) => {
                 return e.id === message.author.id;
             }) != -1) {
                 if (message.content.length != 1) {
                     message.channel.send("Tolong kirim hanya 1 huruf");
                 } else {
-                    if (this.guild.hangman.tebakKata.includes(message.content)) {
-                        if (this.guild.hangman.sudahDitebak.includes(message.content)) {
+                    if (this.guild.hangman.tebakKata.includes(message.content.toLowerCase())) {
+                        if (this.guild.hangman.sudahDitebak.includes(message.content.toLowerCase())) {
                             message.channel.send("Huruf ini sudah ditebak");
                         } else {
                             message.channel.send("Tebakan benar");
                             let replacement = ""
                             for (var x = 0; x < this.guild.hangman.tebakKata.length; x++) {
-                                if (this.guild.hangman.tebakKata.charAt(x) === message.content) {
-                                    replacement += message.content;
+                                if (this.guild.hangman.tebakKata.charAt(x) === message.content.toLowerCase()) {
+                                    replacement += message.content.toLowerCase();
                                 } else {
                                     replacement += this.guild.hangman.sudahDitebak.charAt(x);
                                 }
@@ -115,7 +116,7 @@ module.exports = function (guild) {
                         }
                     } else {
                         this.guild.hangman.percobaan--;
-                        message.channel.send("Tebakan salah\nSisa percobaan : "+this.guild.hangman.percobaan);
+                        message.channel.send("Tebakan salah\nSisa percobaan : " + this.guild.hangman.percobaan);
                         if (this.guild.hangman.percobaan == 0) {
                             this.showHangmanProgress(message);
                             message.channel.send("Tebakan : " + this.guild.hangman.tebakKata + "\n**" + this.guild.player.find((e) => {
@@ -131,7 +132,18 @@ module.exports = function (guild) {
             }
         },
         this.mulaiHangman = function (client) {
-            client.channels.get(this.guild.channelId).send("Kata atau kalimat yang akan ditebak sudah ditentukan, silahkan menebak\n" + this.guild.hangman.sudahDitebak);
+            client.channels.cache.get(this.guild.channelId).send("Kata atau kalimat yang akan ditebak sudah ditentukan, silahkan menebak\n" + this.guild.hangman.sudahDitebak).then((m) => {
+                this.guild.hangman.tebakKata.split('').forEach((e) => {
+                    if (e != " ") {
+                        this.guild.hangman.sudahDitebak += "_";
+                    } else {
+                        this.guild.hangman.sudahDitebak += " ";
+                    }
+                });
+                this.showHangmanProgress(m);
+            });
+
+
         },
         this.showHangmanProgress = (message) => {
             let pesan = "Yang ditebak : ``";
