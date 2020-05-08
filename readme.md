@@ -1,6 +1,6 @@
 # **RomaBot-Discord**
 
-![alt](https://i.imgur.com/LMcvWjk.png)
+![alt](https://i.imgur.com/LMcvWjk.png)<br>
 Source : https://www.picuki.com/media/1772513600670349183
 
 
