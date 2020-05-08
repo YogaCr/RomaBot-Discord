@@ -4,7 +4,7 @@
 Source : https://www.picuki.com/media/1772513600670349183
 
 
-##Command : 
+## Command : 
 - **r*help**
   > Menampilkan command list bot ini
   ![CommandList](https://i.imgur.com/snBJKut.png)
